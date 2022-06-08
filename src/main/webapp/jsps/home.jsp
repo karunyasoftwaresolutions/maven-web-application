@@ -23,7 +23,7 @@
 		+91-8686989972,
 		reddymohan973@gmail.com
 		<br>
-		<a href="mailto:devopstrainingblr@gmail.com">Mail to Mithun Technologies</a>
+		<a href="mailto:reddymohan973@gmail.com">Mail to Mohan Technologies</a>
 	</span>
 </div>
 <hr>
@@ -31,7 +31,7 @@
 <hr>
 <hr>
 <p align=center>Mohan Technologies - Consultant, Training, Development Center.</p>
-<p align=center><small>Copyrights 2021 by <a href="http://mithuntechnologies.com/">Mithun Technologies</a> </small></p>
+<p align=center><small>Copyrights 2021 by <a href="http://mohantechnologies.com/">Mithun Technologies</a> </small></p>
 
 </body>
 </html>
