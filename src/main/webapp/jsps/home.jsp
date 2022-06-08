@@ -31,7 +31,7 @@
 <hr>
 <hr>
 <p align=center>Mohan Technologies - Consultant, Training, Development Center.</p>
-<p align=center><small>Copyrights 2021 by <a href="http://mohantechnologies.com/">Mithun Technologies</a> </small></p>
+<p align=center><small>Copyrights 2021 by <a href="http://mohantechnologies.com/">Mohan Technologies</a> </small></p>
 
 </body>
 </html>
