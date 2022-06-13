@@ -1,12 +1,13 @@
+
 node{
     
 def mavenHome = tool name: "maven3.8.4"
 
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
 
-echo "Job name is: ${env.JOB_NAME}"
-echo "Node name is: ${env.NODE_NAME}"
-echo "Job Build number is: ${env.BUILD_NUMBER}"
+echo "Job name is: ${env.JOB_NAME}" 
+echo "Node name is: ${env.NODE_NAME}" 
+echo "Build number is: ${env.BUILD_NUMBER}" 
 
 
 try{
@@ -15,49 +16,46 @@ sendSlackNotifications('STARTED')
 
 stage('CheckoutCode')
 {
-git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/maven-web-application.git'   
+git branch: 'development', credentialsId: 'f5708724-a441-46f4-8f75-3757193ad3f4', url: 'https://github.com/MithunTechnologiesDevOps/maven-web-application.git'
 }
 
 stage('Build')
 {
-sh "${mavenHome}/bin/mvn clean package" 
+sh "${mavenHome}/bin/mvn clean package"
 }
 /*
 stage('ExecuteSonarQubeReport')
 {
-sh "${mavenHome}/bin/mvn sonar:sonar" 
+sh "${mavenHome}/bin/mvn sonar:sonar"
 }
 
 stage('UploadArtifactsIntoNexus')
 {
-sh "${mavenHome}/bin/mvn deploy" 
+sh "${mavenHome}/bin/mvn deploy"
 }
 
 stage('DeployAppIntoTomcatServer')
 {
-sshagent(['0a25ad7a-defc-43b7-b0c1-4435723edb3e']) {
-sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.245:/opt/apache-tomcat-9.0.63/webapps/"
+sshagent(['82db108b-c059-4ce7-92f7-933e8f8c5dea']) {
+ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.45.84:/opt/apache-tomcat-9.0.63/webapps"   
 }
 }
 */
-
 }catch(e){
-currentBuild.result = 'FAILED'
-  throw e
+currentBuild.result = "FAILED"
+    throw e
 }
-
 finally{
 sendSlackNotifications(currentBuild.result)
 }
 
 }//Node Closing
 
-//Below code use for send Slack Build Notifications
+//Belode code will use for send slack build notifications
 
-def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
- 
- // build status of null means successful
-  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+def sendSlackNotifications(String buildStatus = 'STARTED') {
+  
+  buildStatus =  buildStatus ?: 'SUCCESS'
 
   // Default values
   def colorName = 'RED'
@@ -69,7 +67,7 @@ def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
   if (buildStatus == 'STARTED') {
     color = 'YELLOW'
     colorCode = '#FFFF00'
-  } else if (buildStatus == 'SUCCESSFUL') {
+  } else if (buildStatus == 'SUCCESS') {
     color = 'GREEN'
     colorCode = '#00FF00'
   } else {
