@@ -10,6 +10,9 @@ echo "Job Build number is: ${env.BUILD_NUMBER}"
 
 
 try{
+
+sendSlackNotifications('STARTED')
+
 stage('CheckoutCode')
 {
 git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/maven-web-application.git'   
@@ -39,19 +42,21 @@ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@17
 */
 
 }catch(e){
- currentBuild.result = 'FAILED'
- throw e
+currentBuild.result = 'FAILED'
+  throw e
 }
 
 finally{
-sendSlackNotifications('currentBuild.result')
+sendSlackNotifications(currentBuild.result)
 }
 
 }//Node Closing
 
 //Below code use for send Slack Build Notifications
-ef sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
-  // build status of null means successful
+
+def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
+ 
+ // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
 
   // Default values
