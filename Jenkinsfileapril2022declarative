@@ -4,28 +4,27 @@ pipeline
 agent any
 
 tools{
-maven "maven3.8.5"
+maven "maven3.8.4"
 }
 
 triggers {
-  pollSCM '*  * * * *'
+  pollSCM('* * * * *')
 }
 
 options {
-//Discard old Build
+//Discard Old Build
   buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
-//Adding the timestamps to console output
+  //Adding the timestamos to the console output
   timestamps()
 }
 
-
 stages{
 
-//Checkout Code Stage
-stage('CheckoutCode')
-{
-steps{
-sendSlackNotifications('STARTED')
+ //Checkout COde stage
+ stage('CheckoutCode')
+ {
+ steps{
+ sendSlackNotifications('STARTED')
 git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/maven-web-application.git'   
 }
 }
@@ -34,31 +33,29 @@ git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/mav
 stage('Build')
 {
 steps{
-sh "mvn clean package"  
+sh "mvn clean package"
 }
 }
 
 //Execute SonarQube Report
-stage('ExecuteSonarQubeReport')
+stage('ExecuteSonarQubeReport'){
+steps{
+sh "mvn sonar:sonar"
+}
+}
+
+//Upload artifacts into Artifctoey repo
+stage('UploadIntoNexus')
 {
 steps{
-sh "mvn sonar:sonar"  
+sh "mvn deploy"
 }
 }
 
-
-//Upload Artifacts Into Artifact repository 
-stage('Upload Into Nexus')
-{
+stage('DeployAppintoTomcatServer'){
 steps{
-sh "mvn deploy"  
-}
-}
-
-stage('DeployAppIntoTomcatserver'){
-steps{
-sshagent(['0a25ad7a-defc-43b7-b0c1-4435723edb3e']) {
-sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.245:/opt/apache-tomcat-9.0.63/webapps"
+sshagent(['82db108b-c059-4ce7-92f7-933e8f8c5dea']) {
+ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.45.84:/opt/apache-tomcat-9.0.63/webapps"   
 }
 }
 }
@@ -67,18 +64,21 @@ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@17
 
 post {
   success {
-     sendSlackNotifications('SUCCESS')
+    sendSlackNotifications('SUCCESS')
   }
   failure {
-     sendSlackNotifications('FAILURE')
+   sendSlackNotifications('FAILURE')
   }
 }
 
-}//pipeline closing
+}//Pipeline closing
 
-def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
+
+
+
+def sendSlackNotifications(String buildStatus = 'STARTED') {
   
-  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+  buildStatus =  buildStatus ?: 'SUCCESS'
 
   // Default values
   def colorName = 'RED'
@@ -90,7 +90,7 @@ def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
   if (buildStatus == 'STARTED') {
     color = 'YELLOW'
     colorCode = '#FFFF00'
-  } else if (buildStatus == 'SUCCESSFUL') {
+  } else if (buildStatus == 'SUCCESS') {
     color = 'GREEN'
     colorCode = '#00FF00'
   } else {
@@ -101,3 +101,4 @@ def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
   // Send notifications
   slackSend (color: colorCode, message: summary, channel: 'walmart')
 }
+
