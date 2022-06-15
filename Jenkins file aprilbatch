@@ -1,61 +1,83 @@
+pipeline
+{
 
-node{
-    
-def mavenHome = tool name: "maven3.8.4"
+agent any
 
-properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
+tools{
+maven "maven3.8.4"
+}
 
-echo "Job name is: ${env.JOB_NAME}" 
-echo "Node name is: ${env.NODE_NAME}" 
-echo "Build number is: ${env.BUILD_NUMBER}" 
+triggers {
+  pollSCM '*  * * * *'
+}
+
+options {
+//Discard old Build
+  buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
+//Adding the timestamps to console output
+  timestamps()
+}
 
 
-try{
+stages{
 
-sendSlackNotifications('STARTED')
-
+//Checkout Code Stage
 stage('CheckoutCode')
 {
-git branch: 'development', credentialsId: 'f5708724-a441-46f4-8f75-3757193ad3f4', url: 'https://github.com/MithunTechnologiesDevOps/maven-web-application.git'
+steps{
+git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/maven-web-application.git'   
+}
 }
 
+//Build Stage
 stage('Build')
 {
-sh "${mavenHome}/bin/mvn clean package"
+steps{
+sh "mvn clean package"  
 }
-/*
-stage('ExecuteSonarQubeReport')
+}
+
+//Execute SonarQube Report
+stage('Execute SonarQube Report')
 {
-sh "${mavenHome}/bin/mvn sonar:sonar"
+steps{
+sh "mvn sonar:sonar"  
+}
 }
 
-stage('UploadArtifactsIntoNexus')
+
+//Upload Artifacts Into Artifacts repository 
+stage('Upload Into Nexus')
 {
-sh "${mavenHome}/bin/mvn deploy"
+steps{
+sh "mvn deploy"  
+}
 }
 
-stage('DeployAppIntoTomcatServer')
-{
-sshagent(['82db108b-c059-4ce7-92f7-933e8f8c5dea']) {
- sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.45.84:/opt/apache-tomcat-9.0.63/webapps"   
+stage('DeployAppIntoTomcatserver'){
+steps{
+sshagent(['0a25ad7a-defc-43b7-b0c1-4435723edb3e']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.245:/opt/apache-tomcat-9.0.63/webapps"
 }
 }
-*/
-}catch(e){
-currentBuild.result = "FAILED"
-    throw e
-}
-finally{
-sendSlackNotifications(currentBuild.result)
 }
 
-}//Node Closing
+}//Stages closing
 
-//Belode code will use for send slack build notifications
+post {
+ 
+  success {
+     sendSlackNotifications('SUCCESS')
+  }
+  failure {
+     sendSlackNotifications('FAILURE')
+  }
+}
+}//pipeline closing
 
-def sendSlackNotifications(String buildStatus = 'STARTED') {
-  
-  buildStatus =  buildStatus ?: 'SUCCESS'
+def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
 
   // Default values
   def colorName = 'RED'
@@ -67,7 +89,7 @@ def sendSlackNotifications(String buildStatus = 'STARTED') {
   if (buildStatus == 'STARTED') {
     color = 'YELLOW'
     colorCode = '#FFFF00'
-  } else if (buildStatus == 'SUCCESS') {
+  } else if (buildStatus == 'SUCCESSFUL') {
     color = 'GREEN'
     colorCode = '#00FF00'
   } else {
