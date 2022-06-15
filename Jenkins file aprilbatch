@@ -47,7 +47,7 @@ sh "mvn sonar:sonar"
 }
 
 
-//Upload Artifacts Into Artifacts repository 
+//Upload Artifacts Into Artifact repository 
 stage('Upload Into Nexus')
 {
 steps{
