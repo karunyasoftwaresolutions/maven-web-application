@@ -25,6 +25,7 @@ stages{
 stage('CheckoutCode')
 {
 steps{
+sendSlackNotifications('STARTED')
 git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/maven-web-application.git'   
 }
 }
@@ -38,7 +39,7 @@ sh "mvn clean package"
 }
 
 //Execute SonarQube Report
-stage('Execute SonarQube Report')
+stage('ExecuteSonarQubeReport')
 {
 steps{
 sh "mvn sonar:sonar"  
@@ -72,10 +73,11 @@ post {
      sendSlackNotifications('FAILURE')
   }
 }
+
 }//pipeline closing
 
 def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
-  // build status of null means successful
+  
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
 
   // Default values
