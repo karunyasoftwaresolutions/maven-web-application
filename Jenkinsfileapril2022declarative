@@ -1,3 +1,4 @@
+
 pipeline
 {
 
@@ -25,10 +26,10 @@ stages{
  {
  steps{
  sendSlackNotifications('STARTED')
-git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/maven-web-application.git'   
+ git branch: 'development', url: 'https://github.com/karunyasoftwaresolutions/maven-web-application.git' 
+ }
 }
-}
-
+ 
 //Build Stage
 stage('Build')
 {
@@ -54,8 +55,8 @@ sh "mvn deploy"
 
 stage('DeployAppintoTomcatServer'){
 steps{
-shagent(['0a25ad7a-defc-43b7-b0c1-4435723edb3e']) {
-sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.245:/opt/apache-tomcat-9.0.63/webapps"
+sshagent(['0a25ad7a-defc-43b7-b0c1-4435723edb3e']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.245/opt/apache-tomcat-9.0.63/webapps"
 }
 }
 }
@@ -101,4 +102,3 @@ def sendSlackNotifications(String buildStatus = 'STARTED') {
   // Send notifications
   slackSend (color: colorCode, message: summary, channel: 'walmart')
 }
-
