@@ -75,7 +75,7 @@ post {
 }
 
 }//pipeline closing
-
+/*
 def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
   
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
@@ -101,3 +101,4 @@ def sendSlackNotificationsnotifyBuild(String buildStatus = 'STARTED') {
   // Send notifications
   slackSend (color: colorCode, message: summary, channel: 'walmart')
 }
+*/
